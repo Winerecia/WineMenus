@@ -34,10 +34,7 @@ public class Menu {
     public boolean isUsingSessions() {
         return usingSessions;
     }
-    public boolean isGlobalChangeable() {
-        return globalChangeable;
 
-    }
     public void open(Player player) {
         if (!globalChangeable) {
             player.openInventory(inventory);
@@ -49,7 +46,7 @@ public class Menu {
         }
     }
 
-
+    // TODO
     public void registerComponent() {
 
     }
@@ -58,20 +55,25 @@ public class Menu {
         return name;
     }
 
-    public void setItem(int slot, Item item) {
-        slots.put(slot, item);
-        inventory.setItem(slot, item.getItemstack());
-    }
 
     public Item getItem(int slot) {
         return slots.get(slot);
     }
 
+    public void setItem(int slot, Item item) {
+        slots.put(slot, item);
+        inventory.setItem(slot, item.getItemstack());
+    }
+
+    // TODO
     public void registerAnimationFrame(int count, AnimationFrame animationFrame) {
         if (usingSessions) {
             this.animationFrames.put(count, animationFrame);
         }
     }
+
+
+    // Локальный рендеринг
 
     private void newSession(Player player) {
         Session session = new Session(player.getOpenInventory());
@@ -87,6 +89,17 @@ public class Menu {
         sessions.put(uuid, session);
     }
 
+    public void removeSession(UUID uuid) {
+        sessions.remove(uuid);
+    }
+
+    public HashMap<Integer, Item> cloneMap() {
+        return new HashMap<>(slots);
+    }
+
+
+    // Утилиты
+
     public void replace(int firstIndex, int secondIndex) {
         Item firstSlot = getItem(firstIndex);
         Item secondSlot = getItem(secondIndex);
@@ -95,7 +108,4 @@ public class Menu {
         slots.put(secondIndex, firstSlot);
     }
 
-    public HashMap<Integer, Item> cloneMap() {
-        return new HashMap<>(slots);
-    }
 }

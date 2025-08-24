@@ -8,12 +8,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 
 import java.util.HashMap;
 import java.util.List;
 
-public class OnPlayerClickListener implements Listener {
+public class MenusListener implements Listener {
 
     @EventHandler
     public void onMenuClick(InventoryClickEvent event) {
@@ -40,6 +40,13 @@ public class OnPlayerClickListener implements Listener {
                 }
             }
 
+        }
+    }
+    @EventHandler
+    public void onMenuClose(InventoryCloseEvent event) {
+        if (event.getInventory().getHolder() instanceof MenuHolder holder) {
+            Menu menu = MenuManager.getInstance().getMenu(holder.getIdentificator());
+            menu.removeSession(event.getPlayer().getUniqueId());
         }
     }
 }

@@ -1,0 +1,4 @@
+name: WineMenus
+version: '1.0'
+main: me.kendal.wineMenus.WineMenus
+api-version: '1.21'

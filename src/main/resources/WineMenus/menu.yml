@@ -1,0 +1,51 @@
+title: "Хуесос"
+command: "/bobr"
+size: 5
+
+
+define:
+  blackGlass:
+    material: "Стекло в формате bukkit material"
+    lore:
+      - ''
+      - 'хуесосы'
+      - ''
+    onclick:
+      right:
+        Broadcast("%player% <-- Он обоссался")
+      left:
+        TownDeposit(45)
+      middle:
+      final:
+matrix:
+  x: blackGlass
+  a: whiteGlass
+  b: superHead
+  slots:
+    - [x, a, b, x,a]
+    - []
+    - []
+    - []
+    - []
+
+slots:
+  1: BlackNigger
+  "2-6": Sigmahead
+  "3,2":
+
+
+
+
+animations:
+  1:
+    actions:
+      menuChangeSlot(1, blackGlass)
+    slots:
+      1: BlackNigger
+      "2-6": Sigmahead
+      "3,2":
+    matrix:
+
+
+    reset: true
+

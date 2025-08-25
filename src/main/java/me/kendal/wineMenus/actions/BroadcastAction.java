@@ -1,6 +1,9 @@
 package me.kendal.wineMenus.actions;
 
 import me.kendal.wineMenus.objects.Action;
+import me.kendal.wineMenus.objects.ClickContext;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.bukkit.Bukkit;
 
 import java.util.Map;
 
@@ -40,7 +43,8 @@ public class BroadcastAction extends Action {
     }
 
     @Override
-    public void execute(Map<String, Object> args) {
-
+    public void execute(ClickContext context) {
+        String message = (String) getArgument("message");
+        Bukkit.broadcast(MiniMessage.miniMessage().deserialize(message));
     }
 }

@@ -1,6 +1,8 @@
 package me.kendal.wineMenus;
 
 
+import me.kendal.wineMenus.actions.BroadcastAction;
+import me.kendal.wineMenus.actions.PlayerCommandAction;
 import me.kendal.wineMenus.objects.Action;
 
 import java.util.Collection;
@@ -9,6 +11,19 @@ import java.util.Map;
 
 public class ActionManager {
     private final Map<String, Action> actions = new HashMap<>();
+    private static ActionManager instance;
+
+    public static ActionManager getInstance() {
+        return instance;
+    }
+
+    public static void init() {
+        if (instance == null) {
+            instance = new ActionManager();
+            instance.register(new BroadcastAction());
+            instance.register(new PlayerCommandAction());
+        }
+    }
 
     /**
      * Регистрирует экшен
@@ -35,7 +50,7 @@ public class ActionManager {
         if (action == null) {
             throw new IllegalArgumentException("Action с именем '" + name + "' не найден!");
         }
-        action.execute(args);
+        action.execute(null);
     }
 
     /**

@@ -36,14 +36,15 @@ public class Menu {
     }
 
     public void open(Player player) {
-        if (!globalChangeable) {
-            player.openInventory(inventory);
-            if (usingSessions) {
-                newSession(player);
-            }
-        } else {
-
+        player.openInventory(inventory);
+        if (usingSessions) {
+            newSession(player);
         }
+    }
+
+    public void open(Player player, Session session) {
+        player.openInventory(inventory);
+        setSession(player.getUniqueId(), session);
     }
 
     // TODO
@@ -81,7 +82,7 @@ public class Menu {
         sessions.put(player.getUniqueId(), session);
     }
 
-    public Session getSessionOrNull(UUID uuid) {
+    public Session getSession(UUID uuid) {
         return sessions.get(uuid);
     }
 

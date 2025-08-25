@@ -1,8 +1,11 @@
 package me.kendal.wineMenus.objects;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 public abstract class Action {
+    private final Map<String, Object> arguments = new HashMap<>();
     private final String name;
 
     public Action(String name) {
@@ -33,6 +36,26 @@ public abstract class Action {
     /** Версия действия */
     public abstract String getVersion();
 
+
+
+    // ===== Работа с аргументами =====
+    public void setArgument(String key, Object value) {
+        arguments.put(key, value);
+    }
+
+    public void setArguments(Map<String, Object> args) {
+        arguments.putAll(args);
+    }
+
+    public Object getArgument(String key) {
+        return arguments.get(key);
+    }
+
+    public Map<String, Object> getArguments() {
+        return Collections.unmodifiableMap(arguments);
+    }
+
+
     /** Основной метод выполнения */
-    public abstract void execute(Map<String, Object> args);
+    public abstract void execute(ClickContext context);
 }

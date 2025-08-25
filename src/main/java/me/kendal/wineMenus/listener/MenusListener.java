@@ -3,7 +3,9 @@ package me.kendal.wineMenus.listener;
 import me.kendal.wineMenus.MenuHolder;
 import me.kendal.wineMenus.MenuManager;
 import me.kendal.wineMenus.objects.Action;
+import me.kendal.wineMenus.objects.ClickContext;
 import me.kendal.wineMenus.objects.Menu;
+import me.kendal.wineMenus.objects.Session;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -30,13 +32,16 @@ public class MenusListener implements Listener {
 
             } else {
                 List<Action> actions;
+                ClickContext context = new ClickContext(menu, event);
                 if (menu.isUsingSessions()) {
-                    actions = menu.getSessionOrNull(player.getUniqueId()).getItem(event.getSlot()).getActions();
+                    Session session = menu.getSession(player.getUniqueId());
+                    actions = session.getItem(event.getSlot()).getActions();
+                    context.setSession(session);
                 } else {
                     actions = menu.getItem(event.getSlot()).getActions();
                 }
                 for (Action action : actions) {
-                    action.execute(new HashMap<String, Object>());
+                    action.execute(context);
                 }
             }
 

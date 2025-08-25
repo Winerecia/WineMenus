@@ -1,6 +1,8 @@
 package me.kendal.wineMenus.actions;
 
 import me.kendal.wineMenus.objects.Action;
+import me.kendal.wineMenus.objects.ClickContext;
+import org.bukkit.entity.Player;
 
 import java.util.Map;
 
@@ -41,7 +43,9 @@ public class PlayerCommandAction extends Action {
     }
 
     @Override
-    public void execute(Map<String, Object> args) {
-
+    public void execute(ClickContext context) {
+        String command = (String) getArgument("command");
+        Player player = (Player) getArgument("player");
+        player.performCommand(command);
     }
 }

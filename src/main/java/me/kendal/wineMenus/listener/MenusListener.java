@@ -2,10 +2,8 @@ package me.kendal.wineMenus.listener;
 
 import me.kendal.wineMenus.MenuHolder;
 import me.kendal.wineMenus.MenuManager;
-import me.kendal.wineMenus.objects.Action;
-import me.kendal.wineMenus.objects.ClickContext;
-import me.kendal.wineMenus.objects.Menu;
-import me.kendal.wineMenus.objects.Session;
+import me.kendal.wineMenus.objects.*;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -19,40 +17,56 @@ public class MenusListener implements Listener {
 
     @EventHandler
     public void onMenuClick(InventoryClickEvent event) {
-        if (event.getInventory().getHolder() instanceof MenuHolder holder) {
-            // Проверяем, что кликнул игрок
-            if (!(event.getWhoClicked() instanceof Player player)) return;
+        if (!(event.getWhoClicked() instanceof Player player)) return;
 
-            // Проверяем, что это наше меню
+        if (!(event.getInventory().getHolder() instanceof MenuHolder holder)) return;
 
-            // Отменяем стандартное перемещение предмета
-            event.setCancelled(true);
-            Menu menu = MenuManager.getInstance().getMenu(holder.getIdentificator());
-            if (menu.isUsingSessions()) {
+        // наше меню
+        Menu menu = MenuManager.getInstance().getMenu(holder.getIdentificator());
+        if (menu == null) return;
 
-            } else {
-                List<Action> actions;
-                ClickContext context = new ClickContext(menu, event);
-                if (menu.isUsingSessions()) {
-                    Session session = menu.getSession(player.getUniqueId());
-                    actions = session.getItem(event.getSlot()).getActions();
-                    context.setSession(session);
-                } else {
-                    actions = menu.getItem(event.getSlot()).getActions();
-                }
-                for (Action action : actions) {
-                    action.execute(context);
-                }
+        // отменяем стандартные действия
+        event.setCancelled(true);
+
+        // подготовка контекста
+        ClickContext context = new ClickContext(menu, event);
+
+        Item clickedItem = null;
+        if (menu.isUsingSessions()) {
+            Session session = menu.getSession(player.getUniqueId());
+            if (session == null) {
+                Bukkit.broadcastMessage("§c[WineMenus] Session not found for " + player.getName());
+                return;
             }
+            context.setSession(session);
+            clickedItem = session.getItem(event.getSlot());
+        } else {
+            clickedItem = menu.getItem(event.getSlot());
+        }
 
+        if (clickedItem == null) return;
+
+        List<Action> actions = clickedItem.getActions();
+        if (actions == null || actions.isEmpty()) return;
+
+        for (Action action : actions) {
+            try {
+                action.execute(context);
+                Bukkit.broadcastMessage("§a[WineMenus] Executed action: " + action.getName());
+            } catch (Exception e) {
+                Bukkit.getLogger().severe("[WineMenus] Ошибка при выполнении Action " + action.getName());
+                e.printStackTrace();
+            }
         }
     }
+
     @EventHandler
     public void onMenuClose(InventoryCloseEvent event) {
-        if (event.getInventory().getHolder() instanceof MenuHolder holder) {
-            Menu menu = MenuManager.getInstance().getMenu(holder.getIdentificator());
-            menu.removeSession(event.getPlayer().getUniqueId());
-        }
+        if (!(event.getInventory().getHolder() instanceof MenuHolder holder)) return;
+
+        Menu menu = MenuManager.getInstance().getMenu(holder.getIdentificator());
+        if (menu == null) return;
+
+        menu.removeSession(event.getPlayer().getUniqueId());
     }
 }
-

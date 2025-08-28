@@ -5,7 +5,9 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Item {
     private Material material;
@@ -14,10 +16,14 @@ public class Item {
     private ItemStack itemStack;
     private List<Component> lore;
     private List<Action> actions;
-
+    private Map<String, List<Action>> widgetActions;
 
     public Item(Material material) {
-        this.itemStack = new ItemStack(material);
+        new Item(new ItemStack(material));
+    }
+    public Item(ItemStack itemStack) {
+        this.itemStack = itemStack;
+        actions = new ArrayList<>();
     }
 
     private void setItemMeta(ItemMeta itemMeta) {
@@ -56,6 +62,10 @@ public class Item {
         return this.actions;
     }
 
+    public void addAction(Action action) {
+        this.actions.add(action);
+    }
+
     public void setItemstack(ItemStack itemStack) {
         this.itemStack = itemStack;
     }
@@ -65,8 +75,28 @@ public class Item {
     }
 
 
-//    public Item clone() {
-//        Item item = new Item();
-//        return item;
-//    }
+    @Override
+    public Item clone() {
+        ItemStack clonedStack = itemStack.clone(); // копируем ItemStack
+        Item newItem = new Item(clonedStack);
+
+        // имя
+        newItem.setName(this.name);
+
+        // копия lore
+        if (this.getLore() != null) {
+            newItem.setLore(new ArrayList<>(this.getLore()));
+        }
+
+        // копия действий
+        if (this.actions != null) {
+            List<Action> newActions = new ArrayList<>();
+            for (Action action : this.actions) {
+                newActions.add(action.clone()); // ⚠️ Action тоже должен уметь клонироваться
+            }
+            newItem.setActions(newActions);
+        }
+
+        return newItem;
+    }
 }

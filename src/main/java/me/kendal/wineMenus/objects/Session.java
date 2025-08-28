@@ -1,15 +1,22 @@
 package me.kendal.wineMenus.objects;
 
+import me.kendal.wineMenus.MenuHolder;
+import org.bukkit.Bukkit;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Session {
     private HashMap<Integer, Item> localSlots;
-    private InventoryView view;
+    private Inventory inventory;
+    private List<Integer> widgetSlots;
 
-    public Session(InventoryView view) {
-        this.view = view;
+    public Session(Inventory inventory) {
+        this.localSlots = new HashMap<>();
+        this.inventory = inventory;
     }
 
     public void setMap(HashMap<Integer, Item> map) {
@@ -27,10 +34,26 @@ public class Session {
 
     public void setItem(int slot, Item item) {
         this.localSlots.put(slot, item);
-        view.setItem(slot, item.getItemstack());
+        inventory.setItem(slot, item.getItemstack());
     }
-    public InventoryView getView() {
-        return view;
+    public Inventory getInventory() {
+        return inventory;
+    }
+
+    public HashMap<Integer, Item> cloneMap() {
+        return new HashMap<>(localSlots);
+    }
+
+    public HashMap<Integer, Item> deepCloneMap() {
+        HashMap<Integer, Item> copy = new HashMap<>();
+        for (Map.Entry<Integer, Item> entry : localSlots.entrySet()) {
+            if (entry.getValue() != null) {
+                copy.put(entry.getKey(), entry.getValue().clone());
+            } else {
+                copy.put(entry.getKey(), null);
+            }
+        }
+        return copy;
     }
 }
 

@@ -1,30 +1,81 @@
 package me.kendal.wineMenus.objects;
-
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 public class Widget {
-    private HashMap<Integer, Item> widjet;
+    private final Map<Integer, Item> slots;
     private boolean active;
-    private int zindex = 0;
-    private final String indentificator;
+    private final int zIndex;
+    private final String name;
 
-    public Widget(HashMap<Integer, Item> widjet, String indentificator) {
-        this.widjet = widjet;
-        this.indentificator = indentificator;
+    public Widget(String name, int zIndex) {
+        this.name = name;
+        this.zIndex = zIndex;
+        this.slots = new HashMap<>();
+        this.active = false;
     }
 
+    /**
+     * @return имя виджета
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * @return z-index виджета
+     */
+    public int getZIndex() {
+        return zIndex;
+    }
+
+    /**
+     * Активировать виджет
+     */
+    public void activate() {
+        active = true;
+    }
+
+    /**
+     * Деактивировать виджет
+     */
+    public void deactivate() {
+        active = false;
+    }
+
+    /**
+     * Переключить состояние виджета
+     */
+    public void toggle() {
+        active = !active;
+    }
+
+    /**
+     * @return активен ли виджет
+     */
     public boolean isActive() {
         return active;
     }
 
-    public int getZIndex() {
-        return zindex;
+    /**
+     * Установить Item в слот виджета
+     */
+    public void setItem(int slot, Item item) {
+        slots.put(slot, item);
     }
 
-    public void setZindex(int zindex) {
-        this.zindex = zindex;
+    /**
+     * Получить Item из слота виджета
+     */
+    public Item getItem(int slot) {
+        return slots.get(slot);
     }
 
-
-
+    /**
+     * @return копия всех слотов виджета
+     */
+    public Map<Integer, Item> getSlots() {
+        return Collections.unmodifiableMap(slots);
+    }
 }

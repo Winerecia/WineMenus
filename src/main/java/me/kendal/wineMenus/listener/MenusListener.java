@@ -10,7 +10,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 
-import java.util.HashMap;
 import java.util.List;
 
 public class MenusListener implements Listener {
@@ -18,28 +17,29 @@ public class MenusListener implements Listener {
     @EventHandler
     public void onMenuClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player player)) return;
-
         if (!(event.getInventory().getHolder() instanceof MenuHolder holder)) return;
 
-        // наше меню
+        // получаем меню по идентификатору
         Menu menu = MenuManager.getInstance().getMenu(holder.getIdentificator());
         if (menu == null) return;
 
-        // отменяем стандартные действия
+        // отключаем стандартное поведение
         event.setCancelled(true);
 
-        // подготовка контекста
+        // создаём контекст
         ClickContext context = new ClickContext(menu, event);
 
         Item clickedItem = null;
+
         if (menu.isUsingSessions()) {
             Session session = menu.getSession(player.getUniqueId());
             if (session == null) {
-                Bukkit.broadcastMessage("§c[WineMenus] Session not found for " + player.getName());
+                Bukkit.getLogger().warning("[WineMenus] Сессия не найдена для игрока " + player.getName());
                 return;
             }
             context.setSession(session);
-            clickedItem = session.getItem(event.getSlot());
+
+            clickedItem = session.getRenderedItem(event.getSlot());
         } else {
             clickedItem = menu.getItem(event.getSlot());
         }
@@ -52,7 +52,8 @@ public class MenusListener implements Listener {
         for (Action action : actions) {
             try {
                 action.execute(context);
-                Bukkit.broadcastMessage("§a[WineMenus] Executed action: " + action.getName());
+                Bukkit.getLogger().info("[WineMenus] Executed action: " + action.getName() +
+                        (clickedItem.getName() != null ? " on item " + clickedItem.getName() : ""));
             } catch (Exception e) {
                 Bukkit.getLogger().severe("[WineMenus] Ошибка при выполнении Action " + action.getName());
                 e.printStackTrace();

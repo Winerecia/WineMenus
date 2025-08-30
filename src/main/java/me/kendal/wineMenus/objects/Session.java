@@ -5,14 +5,15 @@ import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class Session {
+    private final List<Widget> widgets = new ArrayList<>();
     private HashMap<Integer, Item> localSlots;
     private Inventory inventory;
-    private List<Integer> widgetSlots;
 
     public Session(Inventory inventory) {
         this.localSlots = new HashMap<>();
@@ -38,6 +39,29 @@ public class Session {
     }
     public Inventory getInventory() {
         return inventory;
+    }
+
+
+
+    public void addWidget(Widget widget) {
+        widgets.add(widget);
+        widgets.sort((w1, w2) -> Integer.compare(w2.getZIndex(), w1.getZIndex())); // по убыв z-index
+    }
+
+    public void removeWidget(Widget widget) {
+        widgets.remove(widget);
+    }
+
+    /**
+     * Получаем Item с учётом виджетов
+     */
+    public Item getRenderedItem(int slot) {
+        for (Widget widget : widgets) {
+            if (widget.isActive() && widget.getSlots().containsKey(slot)) {
+                return widget.getItem(slot);
+            }
+        }
+        return localSlots.get(slot);
     }
 
     public HashMap<Integer, Item> cloneMap() {

@@ -11,6 +11,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public class MenusListener implements Listener {
 
@@ -47,6 +48,7 @@ public class MenusListener implements Listener {
         if (clickedItem == null) return;
 
         List<Action> actions = clickedItem.getActions();
+        Consumer<ClickContext> customHandler = clickedItem.getCustomHandler();
         if (actions == null || actions.isEmpty()) return;
 
         for (Action action : actions) {
@@ -58,6 +60,9 @@ public class MenusListener implements Listener {
                 Bukkit.getLogger().severe("[WineMenus] Ошибка при выполнении Action " + action.getName());
                 e.printStackTrace();
             }
+        }
+        if (customHandler != null) {
+            customHandler.accept(context);
         }
     }
 

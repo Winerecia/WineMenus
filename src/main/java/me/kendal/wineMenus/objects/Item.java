@@ -8,6 +8,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class Item {
     private Material material;
@@ -16,8 +17,7 @@ public class Item {
     private ItemStack itemStack;
     private List<Component> lore;
     private List<Action> actions;
-    private Map<String, List<Action>> widgetActions;
-
+    private Consumer<ClickContext> customHandler;
     public Item(Material material) {
         new Item(new ItemStack(material));
     }
@@ -72,6 +72,16 @@ public class Item {
 
     public ItemStack getItemstack() {
         return itemStack;
+    }
+
+
+
+    public void setCustomHandler(Consumer<ClickContext> customHandler) {
+        this.customHandler = customHandler;
+    }
+
+    public Consumer<ClickContext> getCustomHandler() {
+        return this.customHandler;
     }
 
 

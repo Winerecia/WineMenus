@@ -1,83 +1,172 @@
 package me.kendal.wineMenus.objects;
 
-import me.kendal.wineMenus.MenuHolder;
-import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryView;
-
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
+/**
+ * Сессия игрока: хранит текущее состояние инвентаря и виджетов.
+ */
 public class Session {
-    private final List<Widget> widgets = new ArrayList<>();
-    private HashMap<Integer, Item> localSlots;
-    private Inventory inventory;
+    private final Map<String, Widget> widgets = new HashMap<>();
+    private Map<Integer, Item> localSlots;
+    private Map<String, Object> args = null;
+    private final Inventory inventory;
 
     public Session(Inventory inventory) {
         this.localSlots = new HashMap<>();
         this.inventory = inventory;
     }
 
-    public void setMap(HashMap<Integer, Item> map) {
-        this.localSlots = map;
+    public Session(Inventory inventory, Map<String, Object> args) {
+        this(inventory);
+        this.args = args;
+    }
+    /**
+     * Заменяет текущую карту слотов локальной карты.
+     */
+    public void setMap(Map<Integer, Item> map) {
+        this.localSlots = new HashMap<>(map);
     }
 
-    public void setAnimationFrame(AnimationFrame frame) {
-        frame.setSlots(localSlots);
-    }
+    /**
+     * Устанавливает фрейм анимации на текущие локальные слоты.
+     */
+//    public void setAnimationFrame(AnimationFrame frame) {
+//        frame.setSlots(localSlots);
+//    }
 
-
+    /**
+     * Получить Item из локальных слотов (без учёта виджетов).
+     */
     public Item getItem(int slot) {
         return localSlots.get(slot);
     }
 
+    /**
+     * Установить Item в слот.
+     */
     public void setItem(int slot, Item item) {
-        this.localSlots.put(slot, item);
-        inventory.setItem(slot, item.getItemstack());
+        localSlots.put(slot, item);
+        inventory.setItem(slot, getRenderedItem(slot).getItemstack());
     }
+
+    /**
+     * Вернуть Bukkit-инвентарь, связанный с сессией.
+     */
     public Inventory getInventory() {
         return inventory;
     }
 
-
-
+    /**
+     * Добавить новый виджет.
+     */
     public void addWidget(Widget widget) {
-        widgets.add(widget);
-        widgets.sort((w1, w2) -> Integer.compare(w2.getZIndex(), w1.getZIndex())); // по убыв z-index
-    }
-
-    public void removeWidget(Widget widget) {
-        widgets.remove(widget);
+        widgets.put(widget.getName(), widget);
     }
 
     /**
-     * Получаем Item с учётом виджетов
+     * Удалить виджет по имени.
      */
-    public Item getRenderedItem(int slot) {
-        for (Widget widget : widgets) {
-            if (widget.isActive() && widget.getSlots().containsKey(slot)) {
-                return widget.getItem(slot);
-            }
-        }
-        return localSlots.get(slot);
+    public void removeWidget(String name) {
+        widgets.remove(name);
     }
 
-    public HashMap<Integer, Item> cloneMap() {
+    /**
+     * Получить виджет по имени.
+     */
+    public Widget getWidget(String name) {
+        return widgets.get(name);
+    }
+
+    /**
+     * Активировать виджет по имени.
+     * @return true, если виджет найден и активирован
+     */
+    public boolean activateWidget(String name) {
+        Widget widget = widgets.get(name);
+        if (widget != null) {
+            widget.activate();
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Деактивировать виджет по имени.
+     * @return true, если виджет найден и деактивирован
+     */
+    public boolean deactivateWidget(String name) {
+        Widget widget = widgets.get(name);
+        if (widget != null) {
+            widget.deactivate();
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Переключает состояние виджета по имени.
+     * @return true, если виджет найден и деактивирован
+     */
+    public boolean toggleWidget(String name) {
+        Widget widget = widgets.get(name);
+        if (widget != null) {
+            widget.toggle();
+            for (var key : widget.getSlots().keySet()) {
+                inventory.setItem(key, getRenderedItem(key).getItemstack());
+            }
+            return true;
+        }
+        return false;
+    }
+
+
+    /**
+     * Получить все виджеты в текущей сессии.
+     */
+    public Collection<Widget> getWidgets() {
+        return widgets.values();
+    }
+
+    /**
+     * Получить Item в слоте с учётом активных виджетов и их zIndex.
+     * Если несколько виджетов перекрывают слот, используется тот, у которого zIndex выше.
+     * Если ни один не подошёл, возвращается локальный слот.
+     */
+    public Item getRenderedItem(int slot) {
+        return widgets.values().stream()
+                .filter(widget -> widget.isActive() && widget.getSlots().containsKey(slot))
+                .max(Comparator.comparingInt(Widget::getZIndex))
+                .map(widget -> widget.getItem(slot))
+                .orElse(localSlots.get(slot));
+    }
+
+    /**
+     * Создать поверхностную копию карты слотов.
+     */
+    public Map<Integer, Item> cloneMap() {
         return new HashMap<>(localSlots);
     }
 
-    public HashMap<Integer, Item> deepCloneMap() {
-        HashMap<Integer, Item> copy = new HashMap<>();
-        for (Map.Entry<Integer, Item> entry : localSlots.entrySet()) {
-            if (entry.getValue() != null) {
-                copy.put(entry.getKey(), entry.getValue().clone());
-            } else {
-                copy.put(entry.getKey(), null);
-            }
-        }
+    /**
+     * Создать глубокую копию карты слотов (клонирует каждый Item).
+     */
+    public Map<Integer, Item> deepCloneMap() {
+        Map<Integer, Item> copy = new HashMap<>();
+        localSlots.forEach((key, value) ->
+                copy.put(key, value != null ? value.clone() : null));
         return copy;
     }
+
+
+
+    public Object getArg(String identificator) {
+        return this.args.get(identificator);
+    }
+
 }
+
 

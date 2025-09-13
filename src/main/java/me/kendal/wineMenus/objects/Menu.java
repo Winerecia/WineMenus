@@ -2,6 +2,7 @@ package me.kendal.wineMenus.objects;
 
 import me.kendal.wineMenus.MenuHolder;
 import me.kendal.wineMenus.MenuManager;
+import me.kendal.wineMenus.exceptions.NoUsingLocalRendering;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -57,6 +58,20 @@ public class Menu {
             player.openInventory(createSession(player).getInventory());
         } else {
             player.openInventory(inventory);
+        }
+    }
+
+    /**
+     * Открывает меню с сессией игроку с использованием аргументов
+     *
+     * @param player игрок
+     * @param args аргументы
+     */
+    public void open(Player player, Map<String, Object> args) {
+        if (usingSessions) {
+            player.openInventory(createSession(player, args).getInventory());
+        } else {
+            throw new NoUsingLocalRendering("Аргументы доступны исключительно для меню, использующие локальный рендеринг(сессии)");
         }
     }
 
@@ -126,6 +141,33 @@ public class Menu {
         newInventory.setContents(this.inventory.getContents());
 
         Session session = new Session(newInventory);
+        session.setMap(cloneMap());
+        sessions.put(player.getUniqueId(), session);
+        return session;
+    }
+
+    /**
+     * Создать новую стандартную сессию для игрока
+     * (все предметы разделяются по ссылкам).
+     *
+     * @param player игрок
+     * @return созданная сессия
+     */
+    public Session createSession(Player player, Map<String, Object> args) {
+        Inventory newInventory;
+        if (args.containsKey("WM_title")) {
+            newInventory = Bukkit.createInventory(new MenuHolder(name), inventory.getSize(), (String) args.get("WM_title"));
+        } else {
+            newInventory = Bukkit.createInventory(new MenuHolder(name), inventory.getSize(), title);
+        }
+        newInventory.setContents(this.inventory.getContents());
+
+        Session session;
+        if (args == null) {
+            session = new Session(newInventory);
+        } else {
+            session = new Session(newInventory, args);
+        }
         session.setMap(cloneMap());
         sessions.put(player.getUniqueId(), session);
         return session;

@@ -20,26 +20,19 @@ public class MenusListener implements Listener {
         if (!(event.getWhoClicked() instanceof Player player)) return;
         if (!(event.getInventory().getHolder() instanceof MenuHolder holder)) return;
 
-        // получаем меню по идентификатору
         Menu menu = MenuManager.getInstance().getMenu(holder.getIdentificator());
         if (menu == null) return;
 
-        // отключаем стандартное поведение
         event.setCancelled(true);
 
-        // создаём контекст
         ClickContext context = new ClickContext(menu, event);
-
-        Item clickedItem = null;
+        Item clickedItem;
 
         if (menu.isUsingSessions()) {
             Session session = menu.getSession(player.getUniqueId());
-            if (session == null) {
-                Bukkit.getLogger().warning("[WineMenus] Сессия не найдена для игрока " + player.getName());
-                return;
-            }
-            context.setSession(session);
+            if (session == null) return;
 
+            context.setSession(session);
             clickedItem = session.getRenderedItem(event.getSlot());
         } else {
             clickedItem = menu.getItem(event.getSlot());
@@ -47,22 +40,26 @@ public class MenusListener implements Listener {
 
         if (clickedItem == null) return;
 
-        List<Action> actions = clickedItem.getActions();
+        // customHandler
         Consumer<ClickContext> customHandler = clickedItem.getCustomHandler();
-        if (actions == null || actions.isEmpty()) return;
-
-        for (Action action : actions) {
+        if (customHandler != null) {
             try {
-                action.execute(context);
-                Bukkit.getLogger().info("[WineMenus] Executed action: " + action.getName() +
-                        (clickedItem.getName() != null ? " on item " + clickedItem.getName() : ""));
+                customHandler.accept(context);
             } catch (Exception e) {
-                Bukkit.getLogger().severe("[WineMenus] Ошибка при выполнении Action " + action.getName());
                 e.printStackTrace();
             }
         }
-        if (customHandler != null) {
-            customHandler.accept(context);
+
+        // actions
+        List<Action> actions = clickedItem.getActions();
+        if (actions != null && !actions.isEmpty()) {
+            for (Action action : actions) {
+                try {
+                    action.execute(context);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 

@@ -2,6 +2,7 @@ package me.kendal.wineMenus;
 
 
 import me.kendal.wineMenus.actions.BroadcastAction;
+import me.kendal.wineMenus.actions.OpenMenuAction;
 import me.kendal.wineMenus.actions.PlayerCommandAction;
 import me.kendal.wineMenus.objects.Action;
 
@@ -21,6 +22,7 @@ public class ActionManager {
         if (instance == null) {
             instance = new ActionManager();
             instance.register(new BroadcastAction());
+            instance.register(new OpenMenuAction());
             instance.register(new PlayerCommandAction());
         }
     }

@@ -2,10 +2,12 @@ package me.kendal.wineMenus.objects;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -13,13 +15,12 @@ import java.util.function.Consumer;
 public class Item {
     private Material material;
     private int slot;
-    private String name;
     private ItemStack itemStack;
     private List<Component> lore;
     private List<Action> actions;
     private Consumer<ClickContext> customHandler;
     public Item(Material material) {
-        new Item(new ItemStack(material));
+        this(new ItemStack(material));
     }
     public Item(ItemStack itemStack) {
         this.itemStack = itemStack;
@@ -35,12 +36,14 @@ public class Item {
     }
 
 
-    public void setName(String name) {
-        this.name = name;
+    public void setName(Component name) {
+        ItemMeta meta = getItemMeta();
+        meta.displayName(name);
+        setItemMeta(meta);
     }
 
-    public String getName() {
-        return this.name;
+    public Component getName() {
+        return getItemMeta().displayName();
     }
 
     public void setLore(List<Component> lore) {
@@ -90,10 +93,8 @@ public class Item {
         ItemStack clonedStack = itemStack.clone(); // копируем ItemStack
         Item newItem = new Item(clonedStack);
 
-        // имя
-        newItem.setName(this.name);
 
-        // копия lore
+        // копия лора
         if (this.getLore() != null) {
             newItem.setLore(new ArrayList<>(this.getLore()));
         }
@@ -107,6 +108,55 @@ public class Item {
             newItem.setActions(newActions);
         }
 
+        var meta = newItem.getItemMeta();
+        meta.addItemFlags(this.getItemMeta().getItemFlags().toArray(new ItemFlag[0]));
+        newItem.setItemMeta(meta);
+
+        newItem.setCustomHandler(this.customHandler);
+
+
         return newItem;
+    }
+
+
+
+    public void addFlag(ItemFlag flag) {
+        ItemMeta meta = getItemMeta();
+        meta.addItemFlags(flag);
+        setItemMeta(meta);
+    }
+
+
+    public void addFlags(ItemFlag... flags) {
+        ItemMeta meta = getItemMeta();
+        meta.addItemFlags(flags);
+        setItemMeta(meta);
+    }
+
+
+    public void removeFlag(ItemFlag flag) {
+        ItemMeta meta = getItemMeta();
+        meta.removeItemFlags(flag);
+        setItemMeta(meta);
+    }
+
+
+    public void removeFlags(ItemFlag... flags) {
+        ItemMeta meta = getItemMeta();
+        meta.removeItemFlags(flags);
+        setItemMeta(meta);
+    }
+
+
+    public void clearFlags() {
+        ItemMeta meta = getItemMeta();
+        for (ItemFlag flag : ItemFlag.values()) {
+            meta.removeItemFlags(flag);
+        }
+        setItemMeta(meta);
+    }
+
+    public Collection<ItemFlag> getFlags() {
+        return getItemMeta().getItemFlags();
     }
 }

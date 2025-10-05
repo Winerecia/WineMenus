@@ -1,9 +1,11 @@
 package me.kendal.wineMenus.objects;
+import me.kendal.wineMenus.objects.interfaces.ItemsOwner;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Widget {
+public class Widget implements ItemsOwner {
     private final Map<Integer, Item> slots;
     private boolean active;
     private final int zIndex;

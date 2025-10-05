@@ -1,5 +1,6 @@
 package me.kendal.wineMenus.objects;
 
+import me.kendal.wineMenus.objects.interfaces.ItemsOwner;
 import org.bukkit.inventory.Inventory;
 import java.util.Collection;
 import java.util.Comparator;
@@ -9,7 +10,7 @@ import java.util.Map;
 /**
  * Сессия игрока: хранит текущее состояние инвентаря и виджетов.
  */
-public class Session {
+public class Session implements ItemsOwner {
     private final Map<String, Widget> widgets = new HashMap<>();
     private Map<Integer, Item> localSlots;
     private Map<String, Object> args = null;
@@ -41,6 +42,7 @@ public class Session {
     /**
      * Получить Item из локальных слотов (без учёта виджетов).
      */
+    @Override
     public Item getItem(int slot) {
         return localSlots.get(slot);
     }
@@ -48,6 +50,7 @@ public class Session {
     /**
      * Установить Item в слот.
      */
+    @Override
     public void setItem(int slot, Item item) {
         localSlots.put(slot, item);
         inventory.setItem(slot, getRenderedItem(slot).getItemstack());

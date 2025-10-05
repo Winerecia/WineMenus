@@ -3,6 +3,8 @@ package me.kendal.wineMenus.objects;
 import me.kendal.wineMenus.MenuHolder;
 import me.kendal.wineMenus.MenuManager;
 import me.kendal.wineMenus.exceptions.NoUsingLocalRendering;
+import me.kendal.wineMenus.objects.interfaces.ItemsOwner;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -17,7 +19,7 @@ import java.util.function.Function;
  * Представляет меню с поддержкой глобальных и сессионных инвентарей.
  * Используется как API для создания настраиваемых GUI в плагинах.
  */
-public class Menu {
+public class Menu implements ItemsOwner {
     private final HashMap<Integer, Item> slots;
     private final HashMap<Integer, AnimationFrame> animationFrames;
     private final HashMap<UUID, Session> sessions;
@@ -95,6 +97,7 @@ public class Menu {
      * @param slot индекс слота
      * @return Item или null
      */
+    @Override
     public Item getItem(int slot) {
         return slots.get(slot);
     }
@@ -105,6 +108,7 @@ public class Menu {
      * @param slot индекс слота
      * @param item предмет
      */
+    @Override
     public void setItem(int slot, Item item) {
         slots.put(slot, item);
         inventory.setItem(slot, item.getItemstack());
@@ -155,19 +159,24 @@ public class Menu {
      */
     public Session createSession(Player player, Map<String, Object> args) {
         Inventory newInventory;
-        if (args.containsKey("WM_title")) {
-            newInventory = Bukkit.createInventory(new MenuHolder(name), inventory.getSize(), (String) args.get("WM_title"));
+        if (args != null && args.containsKey("WM_title")) {
+            Object titleObj = args.get("WM_title");
+
+            if (titleObj instanceof Component comp) {
+                // Paper метод
+                newInventory = Bukkit.createInventory(new MenuHolder(name), inventory.getSize(), comp);
+            } else {
+                // старый вариант, если вдруг строка
+                newInventory = Bukkit.createInventory(new MenuHolder(name), inventory.getSize(), String.valueOf(titleObj));
+            }
         } else {
+            // твой дефолтный title (String или Component)
             newInventory = Bukkit.createInventory(new MenuHolder(name), inventory.getSize(), title);
         }
+
         newInventory.setContents(this.inventory.getContents());
 
-        Session session;
-        if (args == null) {
-            session = new Session(newInventory);
-        } else {
-            session = new Session(newInventory, args);
-        }
+        Session session = (args == null) ? new Session(newInventory) : new Session(newInventory, args);
         session.setMap(cloneMap());
         sessions.put(player.getUniqueId(), session);
         return session;

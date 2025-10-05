@@ -3,6 +3,7 @@ package me.kendal.wineMenus.objects.item;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.logging.Logger;
 
@@ -32,6 +33,12 @@ public class GetterItemStack extends ItemStack {
     }
 
     @Override
+    public boolean setItemMeta(ItemMeta meta) {
+        warn("setItemMeta");
+        return false;
+    }
+
+    @Override
     public void addUnsafeEnchantment(org.bukkit.enchantments.Enchantment ench, int level) {
         warn("addUnsafeEnchantment");
         // ничего не делаем
@@ -44,5 +51,4 @@ public class GetterItemStack extends ItemStack {
         return 0;
     }
 
-    // ...и так далее для всех сеттеров
 }

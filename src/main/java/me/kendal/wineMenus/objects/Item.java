@@ -1,7 +1,9 @@
 package me.kendal.wineMenus.objects;
 
+import me.kendal.wineMenus.utils.ItemUtils;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -20,11 +22,28 @@ public class Item {
     private List<Action> actions;
     private Consumer<ClickContext> customHandler;
     public Item(Material material) {
-        this(new ItemStack(material));
+        this(new ItemStack(material), true);
     }
-    public Item(ItemStack itemStack) {
+    public Item(ItemStack itemStack, boolean zeroName) {
         this.itemStack = itemStack;
+        if (zeroName) {
+            ItemMeta meta = getItemMeta();
+            meta.displayName(ItemUtils.mini(""));
+            setItemMeta(meta);
+        }
         actions = new ArrayList<>();
+    }
+
+
+    public Item(ItemStack itemStack) {
+        this(itemStack, true);
+    }
+
+    public void setAmount(int amount) {
+        this.itemStack.setAmount(amount);
+    }
+    public int getAmount() {
+        return this.itemStack.getAmount();
     }
 
     private void setItemMeta(ItemMeta itemMeta) {
@@ -67,6 +86,13 @@ public class Item {
 
     public void addAction(Action action) {
         this.actions.add(action);
+    }
+
+    public void setEnchanted() {
+        ItemMeta meta =  getItemMeta();
+        meta.addEnchant(Enchantment.AQUA_AFFINITY, 1, true);
+        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        setItemMeta(meta);
     }
 
     public void setItemstack(ItemStack itemStack) {

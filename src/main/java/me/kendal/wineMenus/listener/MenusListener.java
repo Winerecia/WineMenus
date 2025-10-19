@@ -19,7 +19,6 @@ public class MenusListener implements Listener {
     public void onMenuClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player player)) return;
         if (!(event.getInventory().getHolder() instanceof MenuHolder holder)) return;
-
         Menu menu = MenuManager.getInstance().getMenu(holder.getIdentificator());
         if (menu == null) return;
 
@@ -51,7 +50,7 @@ public class MenusListener implements Listener {
         }
 
         // actions
-        List<Action> actions = clickedItem.getActions();
+        List<Action> actions = clickedItem.getActions(event.getClick());
         if (actions != null && !actions.isEmpty()) {
             for (Action action : actions) {
                 try {

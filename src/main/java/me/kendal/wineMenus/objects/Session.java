@@ -2,10 +2,8 @@ package me.kendal.wineMenus.objects;
 
 import me.kendal.wineMenus.objects.interfaces.ItemsOwner;
 import org.bukkit.inventory.Inventory;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
+
+import java.util.*;
 
 /**
  * Сессия игрока: хранит текущее состояние инвентаря и виджетов.
@@ -13,6 +11,7 @@ import java.util.Map;
 public class Session implements ItemsOwner {
     private final Map<String, Widget> widgets = new HashMap<>();
     private Map<Integer, Item> localSlots;
+    private List<Frame> animFrames;
     private Map<String, Object> args = null;
     private final Inventory inventory;
 
@@ -24,6 +23,15 @@ public class Session implements ItemsOwner {
     public Session(Inventory inventory, Map<String, Object> args) {
         this(inventory);
         this.args = args;
+
+        if (args.containsKey("WM_animation")) {
+            @SuppressWarnings("unchecked")
+            LinkedList<Frame> frames = (LinkedList<Frame>) args.get("WM_animation");
+            
+            for (Frame frame : frames) {
+                frame.setFrame(this);
+            }
+        }
     }
     /**
      * Заменяет текущую карту слотов локальной карты.

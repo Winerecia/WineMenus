@@ -24,11 +24,11 @@ public class Frame implements ItemsOwner{
 
     @Override
     public Item getItem(int slot) {
-        return null;
+        return animMap.get(slot);
     }
 
     @Override
     public void setItem(int slot, Item item) {
-
+        animMap.put(slot, item);
     }
 }
